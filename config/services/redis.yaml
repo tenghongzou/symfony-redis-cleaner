@@ -1,0 +1,7 @@
+parameters:
+    redis_url: '%env(REDIS_URL)%'
+
+services:
+    App\Service\RedisService:
+        arguments:
+            $redisUrl: 'redis://localhost:6379'
