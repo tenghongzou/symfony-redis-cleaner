@@ -10,15 +10,17 @@ use Relay\Relay;
 use Symfony\Component\Cache\Adapter\RedisAdapter;
 class RedisService
 {
-    private RedisArray|Redis|RedisCluster|Relay|ClientInterface $redisConnection;
+    private RedisArray|Redis|RedisCluster|Relay|ClientInterface|null $redisConnection = null;
 
-    public function __construct(string $redisUrl)
+    public function __construct(private readonly string $redisUrl)
     {
-        $this->redisConnection = RedisAdapter::createConnection($redisUrl);
     }
 
+    /**
+     * 第一次呼叫時才建立連線，之後重複使用同一個連線。
+     */
     public function getConnection(): ClientInterface|Relay|RedisCluster|Redis|RedisArray
     {
-        return $this->redisConnection;
+        return $this->redisConnection ??= RedisAdapter::createConnection($this->redisUrl);
     }
 }

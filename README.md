@@ -40,10 +40,20 @@ REDIS_URL=redis://password@localhost:6379
 ### 清空 Redis DB
 
 ```bash
+# 互動確認後清空
 php bin/console app:clear-redis-cache
+
+# 不經確認直接清空（排程、CI 等非互動環境必須加上）
+php bin/console app:clear-redis-cache --force
 ```
 
 > ⚠️ 會對 `REDIS_URL` 指定的 DB 執行 `FLUSHDB`，清除該 DB 內**所有**鍵值，不只是應用程式的快取，請確認連線目標後再執行。
+
+| 情況 | 結束碼 |
+|---|---|
+| 清空成功，或在確認提示中取消 | `0` |
+| 連線或執行錯誤 | `1` |
+| 非互動模式（如 `-n`）且未加 `--force` | `2` |
 
 ### 刪除指定鍵值
 
@@ -61,9 +71,9 @@ src/
 │   ├── ClearRedisCacheCommand.php   # app:clear-redis-cache
 │   └── DeleteRedisKeyCommand.php    # app:delete-redis-key
 └── Service/
-    └── RedisService.php             # 依 REDIS_URL 建立 Redis 連線
+    └── RedisService.php             # 依 REDIS_URL 建立 Redis 連線（第一次使用時才連線）
 config/services/redis.yaml           # RedisService 服務設定
-tests/Command/                       # 指令的單元測試
+tests/                               # 指令與服務的單元測試
 ```
 
 ## 測試
