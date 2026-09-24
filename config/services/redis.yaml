@@ -4,4 +4,4 @@ parameters:
 services:
     App\Service\RedisService:
         arguments:
-            $redisUrl: 'redis://localhost:6379'
+            $redisUrl: '%redis_url%'

@@ -14,7 +14,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 #[AsCommand(
     name: 'app:delete-redis-key',
-    description: 'Add a short description for your command',
+    description: '刪除指定的 Redis 鍵值',
 )]
 class DeleteRedisKeyCommand extends Command
 {
@@ -29,7 +29,6 @@ class DeleteRedisKeyCommand extends Command
     protected function configure(): void
     {
         $this
-            ->setDescription('刪除指定的 Redis 鍵值')
             ->addArgument('key', InputArgument::REQUIRED, '要刪除的 Redis 鍵值');
     }
 
@@ -42,10 +41,8 @@ class DeleteRedisKeyCommand extends Command
             // 連接到 Redis 伺服器
             $redisConnection = $this->redisService->getConnection();
 
-            // 檢查鍵值是否存在
-            if ($redisConnection->exists($key)) {
-                // 刪除鍵值
-                $redisConnection->del([$key]);
+            // 直接刪除鍵值，依刪除數量判斷是否存在（單一指令，避免 exists/del 之間的競態）
+            if ($redisConnection->del([$key]) > 0) {
                 $io->success("Redis 鍵值 '$key' 已成功刪除。");
             } else {
                 $io->warning("Redis 鍵值 '$key' 不存在。");

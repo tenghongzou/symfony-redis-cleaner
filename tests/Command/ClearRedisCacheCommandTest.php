@@ -5,7 +5,7 @@ namespace App\Tests\Command;
 use App\Command\ClearRedisCacheCommand;
 use App\Service\RedisService;
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\Console\Application;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Tester\CommandTester;
 
 class ClearRedisCacheCommandTest extends TestCase
@@ -20,16 +20,17 @@ class ClearRedisCacheCommandTest extends TestCase
         $redisServiceMock->method('getConnection')->willReturn($redisConnectionMock);
 
         // 配置 Redis 連接行為
-        $redisConnectionMock->method('flushdb')->willReturn(true);
+        $redisConnectionMock->expects($this->once())->method('flushdb')->willReturn(true);
 
         // 創建並測試命令
         $command = new ClearRedisCacheCommand($redisServiceMock);
         $commandTester = new CommandTester($command);
 
-        $commandTester->execute([]);
+        $exitCode = $commandTester->execute([]);
 
         // 檢查輸出
         $output = $commandTester->getDisplay();
+        $this->assertSame(Command::SUCCESS, $exitCode);
         $this->assertStringContainsString('Redis 快取已成功清理。', $output);
     }
 
@@ -43,16 +44,17 @@ class ClearRedisCacheCommandTest extends TestCase
         $redisServiceMock->method('getConnection')->willReturn($redisConnectionMock);
 
         // 配置 Redis 連接行為
-        $redisConnectionMock->method('flushdb')->will($this->throwException(new \Exception('Redis error')));
+        $redisConnectionMock->method('flushdb')->willThrowException(new \Exception('Redis error'));
 
         // 創建並測試命令
         $command = new ClearRedisCacheCommand($redisServiceMock);
         $commandTester = new CommandTester($command);
 
-        $commandTester->execute([]);
+        $exitCode = $commandTester->execute([]);
 
         // 檢查輸出
         $output = $commandTester->getDisplay();
+        $this->assertSame(Command::FAILURE, $exitCode);
         $this->assertStringContainsString('清理 Redis 快取時發生錯誤：Redis error', $output);
     }
 }

@@ -15,7 +15,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 #[AsCommand(
     name: 'app:clear-redis-cache',
-    description: 'Add a short description for your command',
+    description: '清理 Redis 快取',
 )]
 class ClearRedisCacheCommand extends Command
 {
@@ -25,12 +25,6 @@ class ClearRedisCacheCommand extends Command
     {
         parent::__construct();
         $this->redisService = $redisService;
-    }
-
-    protected function configure(): void
-    {
-        $this
-            ->setDescription('清理 Redis 快取');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
